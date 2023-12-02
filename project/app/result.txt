@@ -1,0 +1,13 @@
+student name: shailja
+entry no: 2020csb1124
+email: 2020csb1124@iitrpr.ac.in
+department: cse
+cgpa: 7.25
+batch: 2020
+total credit till: 94
+
+These are the courses details of student 2020csb1124@iitrpr.ac.in
+course name	  course code	  credit	  semester	  grade
+course3	  cs202	  3.0	  3	  B+
+
+course6	  cs302	  3.0	  6	  B+

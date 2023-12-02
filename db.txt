@@ -1,0 +1,145 @@
+
+
+drop database miniproject;
+create database miniproject;
+\c miniproject;
+
+create table admin_roles(               
+current_yr VARCHAR(5) NOT NULL  
+,current_sem INTEGER NOT NULL
+,enrollment_start INTEGER NOT NULL
+,drop_start INTEGER NOT NULL
+,offering INTEGER NOT NULL
+,withdrawl INTEGER NOT NULL  
+,totalcredit_require FLOAT NOT NULL  
+,require_cgpa FLOAT NOT NULL           
+);
+
+create table academic_staff(
+name        VARCHAR(50) NOT NULL
+,email         VARCHAR(50) NOT NULL
+,password   VARCHAR(50) NOT NULL
+
+);
+
+create table faculty(
+name        VARCHAR(50) NOT NULL
+,email         VARCHAR(50) NOT NULL
+,password   VARCHAR(50) NOT NULL
+,dept     VARCHAR(50) NOT NULL
+
+);
+
+create table student(
+name        VARCHAR(50) NOT NULL
+,entry_no  VARCHAR(50) NOT NULL Primary key
+,email         VARCHAR(50) NOT NULL
+,password   VARCHAR(50) NOT NULL
+,dept     VARCHAR(50) NOT NULL
+,cgpa     FLOAT(2)  NOT NULL
+,capstone  INTEGER NOT NULL
+,batch   INTEGER NOT NULL
+,present_semester INTEGER NOT NULL
+,current_credit  INTEGER NOT NULL
+,sturecord_table  VARCHAR(50) NOT NULL 
+);
+
+
+
+
+
+create table admin(
+name        VARCHAR(50) NOT NULL
+,email         VARCHAR(50) NOT NULL
+,password   VARCHAR(50) NOT NULL
+
+);
+
+create table course(
+cname        VARCHAR(50) NOT NULL
+,code         VARCHAR(10) NOT NULL primary key
+,dept    VARCHAR(10) NOT NULL
+,core_or_elec   VARCHAR(10) NOT NULL
+,status  INTEGER NOT NULL
+,ltpc  VARCHAR(20) NOT NULL
+,credit FLOAT(2) NOT NULL
+,no_of_prereq  INTEGER NOT NULL  
+,prereq_table_name  VARCHAR(15) NOT NULL 
+);
+
+create table course_offering(
+ctitle  VARCHAR(50)  NOT NULL   
+,ccode   VARCHAR(10) NOT NULL  
+,credit FLOAT(2) NOT NULL      
+,fac_email  VARCHAR(50) NOT NULL
+,sem INTEGER NOT NULL
+,batch_open  VARCHAR(50) NOT NULL
+,cgpa_req  FLOAT(2) NOT NULL
+);
+
+
+create table logs(
+email VARCHAR(50)  NOT NULL
+--,login_date DATE NOT NULL
+,logintime TIMESTAMP NOT NULL
+);
+
+create or replace function enrollment_report()
+returns trigger
+language plpgsql
+as $$
+declare
+tname varchar(50);
+
+begin
+tname :='report'  || NEW.entry_no;
+execute format(
+'create table %I(
+c_title varchar(50) NOT NULL, 
+c_code varchar(10) NOT NULL primary key,
+c_credit float(2) NOT NULL ,
+sem int NOT NULL,
+grade varchar(2))',tname
+);
+return NULL;
+end;$$;
+
+create or replace trigger streport
+after insert
+on student
+for each row
+execute function enrollment_report();
+
+
+create or replace function prereq_table()
+returns trigger
+language plpgsql
+as $$
+declare
+tname varchar(50);
+nump integer;
+
+begin
+tname :='prereq_'  || NEW.code;
+nump := NEW.no_of_prereq;
+if nump>0 then
+execute format(
+'create table %I(
+ctitle varchar(50) NOT NULL, 
+c_code varchar(10) NOT NULL primary key)',tname
+);
+end if;
+return NULL;
+end;$$;
+
+create or replace trigger course_prereq
+after insert
+on course
+for each row
+execute function prereq_table();
+
+
+
+
+
+
